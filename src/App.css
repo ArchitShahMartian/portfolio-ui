@@ -36,3 +36,23 @@
     transform: rotate(360deg);
   }
 }
+
+.img {
+  cursor: pointer;
+  /*position: absolute;*/
+  border-radius: 50%;
+  border-color: #999999;
+  border-width: 4px;
+  border-style: solid;
+  filter: grayscale(0%);
+  transition-duration: 1s;
+  width: 35%;
+  /*height: auto;*/
+  background-color: black;
+}
+
+.img:hover {
+  filter: grayscale(100%);
+  transition-property: filter;
+  transition-duration: 1s;
+}
