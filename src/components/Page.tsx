@@ -66,7 +66,7 @@ export class Page extends React.Component {
                             <li>React</li>
                             <li>Javascript</li>
                         </UL>
-                        <Button className="bp4-large bp4-outlined bp4-intent-success">Checkout my work</Button>
+                        <Button className="bp4-large bp4-outlined bp4-intent-success" onClick={() => handleClickScroll('projects')}>Checkout my work</Button>
                     </div>
                     <img className= "img" src={background} style={{marginLeft: "10%"}} alt="Pic"/>
                 </div>
@@ -231,7 +231,7 @@ const VinayWireInfo: React.FC = () => (
     <Card>
         <div className="container align-item-baseline" style={{display: "flex", justifyContent: "space-between"}}>
             <p className={`${Classes.TEXT_LARGE} ${Classes.TEXT_MUTED}`}>Mechanical Engineering Intern</p>
-            <p className={`${Classes.TEXT_LARGE} ${Classes.TEXT_MUTED} bp4-align-right`}>June 15 - July 16</p>
+            <p className={`${Classes.TEXT_LARGE} ${Classes.TEXT_MUTED} bp4-align-right`}>June 2015 - July 2016</p>
         </div>
         <p className={`${Classes.TEXT_LARGE} ${Classes.TEXT_MUTED}`}>Gujarat, India</p>
         <UL className={Classes.TEXT_LARGE}>
