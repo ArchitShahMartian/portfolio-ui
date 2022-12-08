@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import {
     Button,
     Callout,
@@ -18,20 +19,31 @@ import {
     Tabs,
     Text, TextArea} from "@blueprintjs/core";
 import Cookies from "js-cookie";
-import { SiteContent } from "../services/api/SiteContent.ts"
-import background from "../img/profilepicture.jpg"
+import { SiteContent } from "../services/api/SiteContent.ts";
+import { Medium } from "../services/api/Medium.ts";
+import background from "../img/profilepicture.jpg";
+import resume from "../document/resume.pdf";
 import { send } from "emailjs-com";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTwitter, faLinkedin, faGithub, faMedium } from '@fortawesome/free-brands-svg-icons';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import axios from "axios";
 
 interface IPageState {
     experienceList? : []
     skillList? : []
     projectList? : []
+    mediumPostList? : any
     emailId?: string
     emailValid?: boolean
     name?: string
     message?: string
     emailStatus?: boolean
+    blogRow: number
 }
+
 
 const validateEmail = (email) => {
   return String(email)
@@ -48,10 +60,12 @@ export class Page extends React.Component {
             experienceList: undefined,
             skillList: undefined,
             projectList: undefined,
+            mediumPostList: undefined,
             emailId: '',
             name: '',
             message: '',
             emailValid: false,
+            blogRow: 3
         }
     }
     render() {
@@ -72,10 +86,33 @@ export class Page extends React.Component {
                             <Button className={Classes.MINIMAL} onClick={() => handleClickScroll('projects')} text="Projects" />
                             <Button className={Classes.MINIMAL} onClick={() => handleClickScroll('blogs')} text="Blogs" />
                             <Button className={Classes.MINIMAL} onClick={() => handleClickScroll('contact')} text="Contact" />
-                            <Button className="bp4-outlined bp4-intent-success" icon="document" text="Resume" />
+                            <Button className="bp4-outlined bp4-intent-success" onClick={() => this.openInNewTab(resume)} icon="document" text="Resume" />
                     </NavbarGroup>
                 </Navbar>
-                {/*<div className="container" style={{textAlign: "left", marginLeft: "30px", marginTop: "30px", backgroundColor: "blue"}}>*/}
+                {/*<div style={{top: "5%", right: "0%", position: "fixed", verticalAlign: "center"}}>*/}
+                    <Container  style={{top: "5%", right: "0%", position: "fixed", verticalAlign: "center"}}>
+                        <Row>
+                            <Col xs={{span: 1, offset: 11}}>
+                                <FontAwesomeIcon onClick={() => this.openInNewTab("https://twitter.com/The_Robot_Guy")} size="sm" style={{color: "#1DA1F2", cursor: "pointer"}} icon={faTwitter} />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs={{span: 1, offset: 11}}>
+                                <FontAwesomeIcon onClick={() => this.openInNewTab("https://www.linkedin.com/in/shah-archit/")} size="sm" style={{color: "#0A66C2", cursor: "pointer"}} icon={faLinkedin} />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs={{span: 1, offset: 11}}>
+                                <FontAwesomeIcon onClick={() => this.openInNewTab("https://github.com/ArchitShahMartian")} size="sm" style={{color: "#171515", cursor: "pointer"}} icon={faGithub} />
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col xs={{span: 1, offset: 11}}>
+                                <FontAwesomeIcon onClick={() => this.openInNewTab("https://medium.com/shah94")} size="sm" style={{color: "#424242", cursor: "pointer"}} icon={faMedium} />
+                            </Col>
+                        </Row>
+                    </Container>
+                {/*</div>*/}
                 <div id="about" className="align-item-baseline" style={{marginTop: "20%", display: "flex", width: "100%", textAlign: "left"}}>
                     <div style={{paddingTop: "5%", width: "50%"}}>
                         <p className="bp4-text-large">Hello!</p>
@@ -121,61 +158,42 @@ export class Page extends React.Component {
                 <div id="projects" style={{marginTop: "10%", textAlign: "left"}}>
                     <Text>What I've built</Text>
                     <Divider/>
-                    <div className="container align-item-baseline" style={{display: "flex", paddingTop: "10px"}}>
-                        <Card ellipsize={true} style={{marginLeft: "2px", marginRight: "2px"}}>
-                            <H6><a href="#">Vertical Farm</a></H6>
-                            <p className={Classes.TEXT_LARGE} ellipsize={true}>
-                                User interfaces that enable people to interact smoothly with data, ask better questions, and
-                                make better decisions.
-                            </p>
-                            <Button text="More Info" className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
-                        </Card>
-                        <Card ellipsize={true} style={{marginLeft: "2px", marginRight: "2px"}}>
-                            <H6><a href="#">Autonomous Robot</a></H6>
-                            <p className={Classes.TEXT_LARGE} ellipsize={true}>
-                                User interfaces that enable people to interact smoothly with data, ask better questions, and
-                                make better decisions.
-                            </p>
-                            <Button text="More Info" className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
-                        </Card>
-                        <Card ellipsize={true} style={{marginLeft: "2px", marginRight: "2px"}}>
-                            <H6><a href="#">Supply Chain App</a></H6>
-                            <p className={Classes.TEXT_LARGE} ellipsize={true}>
-                                User interfaces that enable people to interact smoothly with data, ask better questions, and
-                                make better decisions.
-                            </p>
-                            <Button text="More Info" className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
-                        </Card>
+                    <div className="container align-item-baseline" style={{display: "flex", flexWrap: "wrap", paddingTop: "10px"}}>
+                        {this.state.projectList?.map((value) =>
+                            <Card ellipsize={true} style={{width: "33%", marginLeft: "5px", marginRight: "5px"}}>
+                                <img src={value.image} style={{width: "100%", height: "250px"}} alt="Image"/>
+                                <H6><a href="#">{value.title}</a></H6>
+                                <p className={Classes.TEXT_LARGE} ellipsize={true}>
+                                    {value.content}
+                                </p>
+                                <Button onClick={() => this.openInNewTab(value.link)}
+                                        text="See Project"
+                                        className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
+                            </Card>
+                        )}
                     </div>
                 </div>
                 <div id="blogs" style={{marginTop: "10%", textAlign: "left"}}>
                     <Text>Blogs</Text>
                     <Divider/>
-                    <div className="container align-item-baseline" style={{display: "flex", paddingTop: "10px"}}>
-                        <Card ellipsize={true} style={{marginLeft: "2px", marginRight: "2px"}}>
-                            <H6><a href="#">Vertical Farm</a></H6>
-                            <p className={Classes.TEXT_LARGE} ellipsize={true}>
-                                User interfaces that enable people to interact smoothly with data, ask better questions, and
-                                make better decisions.
-                            </p>
-                            <Button text="More Info" className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
-                        </Card>
-                        <Card ellipsize={true} style={{marginLeft: "2px", marginRight: "2px"}}>
-                            <H6><a href="#">Autonomous Robot</a></H6>
-                            <p className={Classes.TEXT_LARGE} ellipsize={true}>
-                                User interfaces that enable people to interact smoothly with data, ask better questions, and
-                                make better decisions.
-                            </p>
-                            <Button text="More Info" className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
-                        </Card>
-                        <Card ellipsize={true} style={{marginLeft: "2px", marginRight: "2px"}}>
-                            <H6><a href="#">Supply Chain App</a></H6>
-                            <p className={Classes.TEXT_LARGE} ellipsize={true}>
-                                User interfaces that enable people to interact smoothly with data, ask better questions, and
-                                make better decisions.
-                            </p>
-                            <Button text="More Info" className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`} />
-                        </Card>
+                    <div className="container align-item-baseline" style={{display: "flex", flexWrap: "wrap", paddingTop: "10px"}}>
+                        {this.state.mediumPostList?.slice(0, this.state.blogRow)?.map((value) =>
+                            <Card ellipsize={true} style={{flex: "1 0 27%", margin: "5px 5px"}}>
+                                <img src={value.thumbnail} style={{width: "100%", height: "250px"}}/>
+                                <H6 style={{marginLeft: "2px", marginRight: "2px"}}>{value.title}</H6>
+                                <Button onClick={() => this.openInNewTab(value.link)}
+                                        text="See Blog"
+                                        style={{marginBottom: "5px"}}
+                                        className={`${Classes.BUTTON} bp4-outlined bp4-intent-success`}/>
+                            </Card>
+                        )}
+                    </div>
+                    <div className="container align-item-baseline" style={{display: "flex", justifyContent: "space-between", marginLeft: "5px", marginRight: "5px"}}>
+                        <Button onClick={this.handleMoreBlogs.bind(this)}
+                                text={"Load More"}/>
+                        <Button onClick={this.handleLessBlogs.bind(this)}
+                                disabled={this.state.blogRow === 3 ? true: false}
+                                text={"Load Less"}/>
                     </div>
                 </div>
                 <div id="contact" className="container" style={{marginTop: "10%", marginBottom:"30%", textAlign: "left"}}>
@@ -246,12 +264,37 @@ export class Page extends React.Component {
         )
     }
 
+    handleMoreBlogs(){
+        this.setState(prevState => ({
+            blogRow: prevState.blogRow + 3
+        }))
+    }
+
+    handleLessBlogs(){
+        this.setState(prevState => ({
+            blogRow: 3
+        }))
+    }
+
+    openInNewTab = (url) => {
+        window.open(url, '_blank',);
+    }
+
     componentDidMount(){
         Promise.all([
             this.getExperience(),
             this.getProject(),
-            this.getSkill()]
+            this.getSkill(),
+            this.getMediumPosts()]
         )
+    }
+
+    getMediumPosts(){
+        Medium.MediumPost().then((response: any) => {
+            this.setState({
+                mediumPostList:  response.data.items
+            })
+        })
     }
 
     getExperience() {
