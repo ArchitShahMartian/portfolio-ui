@@ -3,7 +3,7 @@ import * as querystring from "querystring";
 
 
 export const axiosClient = axios.create({
-    baseURL: 'http://192.168.1.69/',
+    baseURL: 'https://architshah.info/',
     timeout: 6000,
     paramsSerializer: params => {
         return querystring.stringify(params)
